@@ -1,106 +1,67 @@
 package org.softc.armoryexpansion.integration.plugins.tinkers_construct;
 
 import c4.conarm.lib.materials.ArmorMaterialType;
-import com.mcmoddev.lib.integration.plugins.tinkers.TinkerTraitLocation;
-import net.minecraft.item.Item;
+import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Tuple;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.config.Property;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fml.common.event.FMLInterModComms;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
 import org.softc.armoryexpansion.integration.plugins.constructs_armory.ConArmStats;
+import org.softc.armoryexpansion.integration.plugins.tinkers_construct.fluids.TiCFluid;
+import org.softc.armoryexpansion.integration.plugins.tinkers_construct.fluids.TiCFluidBlock;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.TinkerRegistry;
 import slimeknights.tconstruct.library.client.MaterialRenderInfo;
 import slimeknights.tconstruct.library.materials.Material;
+import slimeknights.tconstruct.library.materials.MaterialTypes;
 import slimeknights.tconstruct.library.traits.ITrait;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class TiCMaterial {
-    private String identifier;
-    private String itemName;
-    private int meta = 0;
-    private int color;
-    private MaterialRenderType type = MaterialRenderType.DEFAULT;
-    private ResourceLocation texture;
+public class TiCMaterial extends AbstractTiCMaterial{
     private int durability = 0;
-    private float hardness = 0;
+    private float miningSpeed = 0;
     private float damage = 0;
-    private float magicaffinity = 0;
+    private float magicAffinity = 0;
     private int harvestLevel = 0;
     private float range = 0;
     private float accuracy = 0;
     private float defense = 0;
     private float toughness = 0;
 
-    private List<Tuple<String, String>> traits = new LinkedList<>();
+    private List<TraitHolder> traits = new LinkedList<>();
 
-    private boolean isCastable = false;
-    private boolean isCraftable = false;
+    class TraitHolder{
+        private String traitName;
+        private String traitPart;
 
-    private boolean isToolMaterial = false;
-    private boolean isBowMaterial = false;
-    private boolean isFletchingMaterial = false;
-    private boolean isProjectileMaterial = false;
-    private boolean isArmorMaterial = false;
+        String getTraitName() {
+            return traitName;
+        }
 
+        String getTraitPart() {
+            return traitPart;
+        }
+
+        TraitHolder(String traitName, String traitPart) {
+            this.traitName = traitName;
+            this.traitPart = traitPart;
+        }
+    }
 
     public TiCMaterial(String identifier, String itemName, int color) {
-        this(identifier, itemName, 0, color);
+        super(identifier, itemName, color);
     }
 
     public TiCMaterial(String identifier, String itemName, int meta, int color) {
-        this.identifier = identifier;
-        this.itemName = itemName;
-        this.meta = meta;
-        this.color = color;
-    }
-
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    public String getItemName() {
-        return itemName;
-    }
-
-    private Item getItem() {
-        return Item.getByNameOrId(itemName);
-    }
-
-    private ItemStack getItemStack() {
-        return new ItemStack(this.getItem(), 1, this.meta);
-    }
-
-    public int getColor() {
-        return color;
-    }
-
-    public MaterialRenderType getType() {
-        return type;
-    }
-
-    public TiCMaterial setType(MaterialRenderType type) {
-        this.type = type;
-        return this;
-    }
-
-    public ResourceLocation getTexture() {
-        return texture;
-    }
-
-    public TiCMaterial setTexture(ResourceLocation texture) {
-        this.texture = texture;
-        return this;
-    }
-
-    public TiCMaterial setTexture(String texture) {
-        this.texture = new ResourceLocation(texture);
-        return this;
+        super(identifier, itemName, meta, color);
     }
 
     public int getDurability() {
@@ -112,16 +73,16 @@ public class TiCMaterial {
         return this;
     }
 
-    float getHardness() {
-        return hardness;
+    public float getMiningSpeed() {
+        return miningSpeed;
     }
 
-    public TiCMaterial setHardness(float hardness) {
-        this.hardness = hardness;
+    public TiCMaterial setMiningSpeed(float miningSpeed) {
+        this.miningSpeed = miningSpeed;
         return this;
     }
 
-    float getDamage() {
+    public float getDamage() {
         return damage;
     }
 
@@ -130,16 +91,16 @@ public class TiCMaterial {
         return this;
     }
 
-    public float getMagicaffinity() {
-        return magicaffinity;
+    public float getMagicAffinity() {
+        return magicAffinity;
     }
 
-    public TiCMaterial setMagicaffinity(float magicaffinity) {
-        this.magicaffinity = magicaffinity;
+    public TiCMaterial setMagicAffinity(float magicAffinity) {
+        this.magicAffinity = magicAffinity;
         return this;
     }
 
-    int getHarvestLevel() {
+    public int getHarvestLevel() {
         return harvestLevel;
     }
 
@@ -148,7 +109,7 @@ public class TiCMaterial {
         return this;
     }
 
-    float getRange() {
+    public float getRange() {
         return range;
     }
 
@@ -185,7 +146,7 @@ public class TiCMaterial {
     }
 
     private TiCMaterial addTrait(String trait, String location) {
-        this.traits.add(new Tuple<>(trait, location));
+        this.traits.add(new TraitHolder(trait, location));
         return this;
     }
 
@@ -213,13 +174,13 @@ public class TiCMaterial {
     }
 
     public TiCMaterial addPrimaryToolTrait(String trait) {
-        this.addTrait(trait, TinkerTraitLocation.HEAD.name());
+        this.addTrait(trait, MaterialTypes.HEAD);
         return this;
     }
 
     public TiCMaterial addSecondaryToolTrait(String trait) {
-        this.addTrait(trait, TinkerTraitLocation.HANDLE.name());
-        this.addTrait(trait, TinkerTraitLocation.EXTRA.name());
+        this.addTrait(trait, MaterialTypes.HANDLE);
+        this.addTrait(trait, MaterialTypes.EXTRA);
         return this;
     }
 
@@ -235,76 +196,16 @@ public class TiCMaterial {
         return this;
     }
 
-    public boolean isCastable() {
-        return isCastable;
-    }
-
-    public TiCMaterial setCastable(boolean castable) {
-        isCastable = castable;
-        return this;
-    }
-
-    public boolean isCraftable() {
-        return isCraftable;
-    }
-
-    public TiCMaterial setCraftable(boolean craftable) {
-        isCraftable = craftable;
-        return this;
-    }
-
-    public boolean isToolMaterial() {
-        return isToolMaterial;
-    }
-
-    public TiCMaterial setToolMaterial(boolean toolMaterial) {
-        isToolMaterial = toolMaterial;
-        return this;
-    }
-
-    public boolean isBowMaterial() {
-        return isBowMaterial;
-    }
-
-    public TiCMaterial setBowMaterial(boolean bowMaterial) {
-        isBowMaterial = bowMaterial;
-        return this;
-    }
-
-    public boolean isFletchingMaterial() {
-        return isFletchingMaterial;
-    }
-
-    public TiCMaterial setFletchingMaterial(boolean fletchingMaterial) {
-        isFletchingMaterial = fletchingMaterial;
-        return this;
-    }
-
-    public boolean isProjectileMaterial() {
-        return isProjectileMaterial;
-    }
-
-    public TiCMaterial setProjectileMaterial(boolean projectileMaterial) {
-        isProjectileMaterial = projectileMaterial;
-        return this;
-    }
-
-    public boolean isArmorMaterial() {
-        return isArmorMaterial;
-    }
-
-    public TiCMaterial setArmorMaterial(boolean armorMaterial) {
-        isArmorMaterial = armorMaterial;
-        return this;
-    }
-
     public TiCMaterial registerOreDict() {
-        OreDictionary.registerOre(this.identifier, this.getItemStack());
+        ItemStack stack = this.getItemStack();
+        if(stack != null){
+            OreDictionary.registerOre(this.identifier, this.getItemStack());
+        }
         return this;
     }
 
     @SideOnly(Side.CLIENT)
-    private void setMaterialRenderInfo(Material material) {
+    protected void setMaterialRenderInfo(Material material) {
             MaterialRenderInfo materialRenderInfo = new MaterialRenderInfo.Default(this.color);
             switch (this.type) {
                 case METAL:
@@ -313,59 +214,99 @@ public class TiCMaterial {
                 case METALTEXTURED:
                     materialRenderInfo = new MaterialRenderInfo.MetalTextured(this.texture, this.color, 0.4f, 0.4f, 0.1f);
                     break;
+                default:
+                    break;
             }
             material.setRenderInfo(materialRenderInfo);
     }
 
-    public void registerTinkersMaterial(){
+    public boolean registerTinkersMaterial(){
         if (!TinkerRegistry.getMaterial(this.identifier).identifier.equals("unknown")){
-            return;
+            return false;
         }
         Material material = new Material(this.identifier, this.color);
         material.setCastable(this.isCastable)
                 .setCraftable(this.isCraftable)
                 .addItemIngot(this.identifier);
 //        this.setMaterialRenderInfo(material);
+        this.registerTinkersFluid();
         TinkerRegistry.addMaterial(material);
         TinkerRegistry.integrate(material);
+        return true;
     }
 
-    public void registerTinkersMaterialStats(Map<String, Property> properties){
+    public boolean registerTinkersFluid(){
+        if(!isCastable){
+            return false;
+        }
+        Fluid materialFluid = new TiCFluid(this.identifier, this.color);
+        FluidRegistry.registerFluid(materialFluid);
+        FluidRegistry.addBucketForFluid(materialFluid);
+
+        NBTTagCompound tag = new NBTTagCompound();
+        tag.setString("fluid", materialFluid.getName());
+        tag.setString("ore", this.identifier);
+        tag.setBoolean("toolforge", true);
+
+        FMLInterModComms.sendMessage(TConstruct.modID, "integrateSmeltery", tag);
+        return true;
+    }
+
+    public Fluid getFluid(){
+        return new TiCFluid(this.identifier, this.color);
+    }
+
+    public Block getFluidBlock(){
+        return new TiCFluidBlock(getFluid());
+    }
+
+    public boolean registerTinkersMaterialStats(Map<String, Property> properties){
+        boolean retVal = false;
         if (this.isToolMaterial()) {
             TiCStats.registerMaterialToolStats(this, properties);
+            retVal = true;
         }
         if (this.isBowMaterial()) {
             TiCStats.registerMaterialBowStats(this, properties);
+            retVal = true;
         }
         if (this.isFletchingMaterial()) {
             TiCStats.registerMaterialFletchingStats(this, properties);
+            retVal = true;
         }
         if (this.isProjectileMaterial()) {
             TiCStats.registerMaterialProjectileStats(this, properties);
+            retVal = true;
         }
         if (this.isArmorMaterial()) {
             ConArmStats.registerMaterialArmorStats(this, properties);
+            retVal = true;
         }
+        return retVal;
     }
 
-    public void updateTinkersMaterial(){
+    public boolean updateTinkersMaterial(){
         Material material = TinkerRegistry.getMaterial(this.identifier);
-        if (material.identifier.equals("unknown")){
-            return;
+        if ("unknown".equals(material.identifier)){
+            return false;
         }
         material.addItem(this.getItem());
         material.setRepresentativeItem(this.getItemStack());
+        return true;
     }
 
-    public void registerTinkersMaterialTraits() {
+    public boolean registerTinkersMaterialTraits() {
         Material material = TinkerRegistry.getMaterial(this.identifier);
-        if (material.identifier.equals("unknown")) {
-            return;
+        if ("unknown".equals(material.identifier)) {
+            return false;
         }
         this.traits.forEach( t -> {
-            ITrait trait = TinkerRegistry.getTrait(t.getFirst());
-            material.addTrait(trait, t.getSecond());
+            ITrait trait = TinkerRegistry.getTrait(t.getTraitName());
+            if(trait != null){
+                material.addTrait(trait, t.getTraitPart());
+            }
         });
         TinkerRegistry.integrate(material);
+        return this.traits.size() > 0;
     }
 }
