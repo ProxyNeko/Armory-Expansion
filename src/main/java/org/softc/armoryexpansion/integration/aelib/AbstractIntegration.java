@@ -6,6 +6,7 @@ import net.minecraft.block.Block;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -13,7 +14,7 @@ import org.apache.logging.log4j.Logger;
 import org.softc.armoryexpansion.ArmoryExpansion;
 import org.softc.armoryexpansion.integration.plugins.tinkers_construct.ITiCMaterial;
 import org.softc.armoryexpansion.integration.plugins.tinkers_construct.TiCMaterial;
-import org.softc.armoryexpansion.integration.plugins.tinkers_construct.fluids.TiCAlloy;
+import org.softc.armoryexpansion.integration.plugins.tinkers_construct.alloys.TiCAlloy;
 
 import java.io.*;
 import java.util.*;
@@ -33,7 +34,7 @@ public abstract class AbstractIntegration{
         this.logger = event.getModLog();
         Property property = ArmoryExpansion.config
                 .get("integrations", modid, true, "Whether integration with " + modid + " should be enabled");
-        isEnabled = property == null || property.getBoolean();
+        isEnabled = property == null || property.getBoolean() && Loader.isModLoaded(modid);
         ArmoryExpansion.config.save();
         if(isEnabled){
             this.configHelper = new Config(new Configuration(new File(event.getModConfigurationDirectory().getPath() + "/" + ArmoryExpansion.MODID + "/" + modid + ".cfg")));
