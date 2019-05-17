@@ -11,14 +11,14 @@ import static c4.conarm.lib.materials.ArmorMaterialType.*;
 import static slimeknights.tconstruct.library.materials.MaterialTypes.*;
 
 public class Config{
-    private static final String TRAIT = "trait";
+    static final String TRAIT = "trait";
     static final String CATEGORY_MATERIAL = "material";
-    private static final String CATEGORY_ARMOR = "armor";
+    private static final String CATEGORY_YOYO = "armor";
     private static final String CATEGORY_TOOL = "tool";
     private static final String CATEGORY_BOW = "bow";
 
-    private Map<String,Map<String, Property>> properties = new HashMap<>();
-    private Configuration configuration;
+    Map<String,Map<String, Property>> properties = new HashMap<>();
+    Configuration configuration;
 
     Config(Configuration configuration) {
         this.configuration = configuration;
@@ -36,7 +36,7 @@ public class Config{
         return properties.get(material);
     }
 
-    private Property addMaterialProperty(final ITiCMaterial material) {
+    Property addMaterialProperty(final ITiCMaterial material) {
         return configuration.get(
                 material.getIdentifier(),
                 "enable_material",
@@ -54,7 +54,7 @@ public class Config{
         );
     }
 
-    private Property addMaterialTraitProperty(final ITiCMaterial material){
+    Property addMaterialTraitProperty(final ITiCMaterial material){
         return configuration.get(
                 material.getIdentifier(),
                 "enable_traits",
@@ -63,12 +63,12 @@ public class Config{
         );
     }
 
-    private void putSubcategoryProperty(Map<String, Property> materialProperties, String subcategory, String part, ITiCMaterial material){
+    void putSubcategoryProperty(Map<String, Property> materialProperties, String subcategory, String part, ITiCMaterial material){
         configuration.getCategory(material.getIdentifier() + "." + subcategory);
         materialProperties.put(part, addMaterialPartProperty(material, part, subcategory));
     }
 
-    void syncConfig(Map<String, ITiCMaterial> materials) { // Gets called from preInit
+    public void syncConfig(Map<String, ? extends ITiCMaterial> materials) { // Gets called from preInit
         try {
             // Load config
             configuration.load();
@@ -81,9 +81,9 @@ public class Config{
                     materialProperties.put(TRAIT, addMaterialTraitProperty(material));
 
                     if(material.isArmorMaterial()){
-                        putSubcategoryProperty(materialProperties, CATEGORY_ARMOR, CORE, material);
-                        putSubcategoryProperty(materialProperties, CATEGORY_ARMOR, TRIM, material);
-                        putSubcategoryProperty(materialProperties, CATEGORY_ARMOR, PLATES, material);
+                        putSubcategoryProperty(materialProperties, CATEGORY_YOYO, CORE, material);
+                        putSubcategoryProperty(materialProperties, CATEGORY_YOYO, TRIM, material);
+                        putSubcategoryProperty(materialProperties, CATEGORY_YOYO, PLATES, material);
                     }
 
                     if(material.isToolMaterial()){

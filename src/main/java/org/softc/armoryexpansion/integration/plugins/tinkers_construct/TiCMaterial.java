@@ -26,19 +26,19 @@ import java.util.List;
 import java.util.Map;
 
 public class TiCMaterial extends AbstractTiCMaterial{
-    private int durability = 0;
+    protected int durability = 0;
     private float miningSpeed = 0;
     private float damage = 0;
-    private float magicAffinity = 0;
+    protected float magicAffinity = 0;
     private int harvestLevel = 0;
     private float range = 0;
     private float accuracy = 0;
     private float defense = 0;
     private float toughness = 0;
 
-    private List<TraitHolder> traits = new LinkedList<>();
+    protected List<TraitHolder> traits = new LinkedList<>();
 
-    class TraitHolder{
+    protected class TraitHolder{
         private String traitName;
         private String traitPart;
 
@@ -50,7 +50,7 @@ public class TiCMaterial extends AbstractTiCMaterial{
             return traitPart;
         }
 
-        TraitHolder(String traitName, String traitPart) {
+        public TraitHolder(String traitName, String traitPart) {
             this.traitName = traitName;
             this.traitPart = traitPart;
         }
@@ -68,7 +68,7 @@ public class TiCMaterial extends AbstractTiCMaterial{
         return durability;
     }
 
-    public TiCMaterial setDurability(int durability) {
+    public ITiCMaterial setDurability(int durability) {
         this.durability = durability;
         return this;
     }
@@ -77,7 +77,7 @@ public class TiCMaterial extends AbstractTiCMaterial{
         return miningSpeed;
     }
 
-    public TiCMaterial setMiningSpeed(float miningSpeed) {
+    public ITiCMaterial setMiningSpeed(float miningSpeed) {
         this.miningSpeed = miningSpeed;
         return this;
     }
@@ -86,7 +86,7 @@ public class TiCMaterial extends AbstractTiCMaterial{
         return damage;
     }
 
-    public TiCMaterial setDamage(float damage) {
+    public ITiCMaterial setDamage(float damage) {
         this.damage = damage;
         return this;
     }
@@ -95,7 +95,7 @@ public class TiCMaterial extends AbstractTiCMaterial{
         return magicAffinity;
     }
 
-    public TiCMaterial setMagicAffinity(float magicAffinity) {
+    public ITiCMaterial setMagicAffinity(float magicAffinity) {
         this.magicAffinity = magicAffinity;
         return this;
     }
@@ -104,7 +104,7 @@ public class TiCMaterial extends AbstractTiCMaterial{
         return harvestLevel;
     }
 
-    public TiCMaterial setHarvestLevel(int harvestLevel) {
+    public ITiCMaterial setHarvestLevel(int harvestLevel) {
         this.harvestLevel = harvestLevel;
         return this;
     }
@@ -113,7 +113,7 @@ public class TiCMaterial extends AbstractTiCMaterial{
         return range;
     }
 
-    public TiCMaterial setRange(float range) {
+    public ITiCMaterial setRange(float range) {
         this.range = range;
         return this;
     }
@@ -122,7 +122,7 @@ public class TiCMaterial extends AbstractTiCMaterial{
         return accuracy;
     }
 
-    public TiCMaterial setAccuracy(float accuracy) {
+    public ITiCMaterial setAccuracy(float accuracy) {
         this.accuracy = accuracy;
         return this;
     }
@@ -131,7 +131,7 @@ public class TiCMaterial extends AbstractTiCMaterial{
         return defense;
     }
 
-    public TiCMaterial setDefense(float defense) {
+    public ITiCMaterial setDefense(float defense) {
         this.defense = defense;
         return this;
     }
@@ -140,63 +140,63 @@ public class TiCMaterial extends AbstractTiCMaterial{
         return toughness;
     }
 
-    public TiCMaterial setToughness(float toughness) {
+    public ITiCMaterial setToughness(float toughness) {
         this.toughness = toughness;
         return this;
     }
 
-    private TiCMaterial addTrait(String trait, String location) {
+    protected ITiCMaterial addTrait(String trait, String location) {
         this.traits.add(new TraitHolder(trait, location));
         return this;
     }
 
-    public TiCMaterial addPrimaryArmorTrait(String trait) {
+    public ITiCMaterial addPrimaryArmorTrait(String trait) {
         this.addTrait(trait, ArmorMaterialType.CORE);
         return this;
     }
 
-    public TiCMaterial addSecondaryArmorTrait(String trait) {
+    public ITiCMaterial addSecondaryArmorTrait(String trait) {
         this.addTrait(trait, ArmorMaterialType.TRIM);
         this.addTrait(trait, ArmorMaterialType.PLATES);
         return this;
     }
 
-    public TiCMaterial addGlobalArmorTrait(String trait) {
+    public ITiCMaterial addGlobalArmorTrait(String trait) {
         this.addPrimaryArmorTrait(trait);
         this.addSecondaryArmorTrait(trait);
         return this;
     }
 
-    public TiCMaterial addArmorTrait(String trait1, String trait2) {
+    public ITiCMaterial addArmorTrait(String trait1, String trait2) {
         this.addPrimaryArmorTrait(trait1);
         this.addSecondaryArmorTrait(trait2);
         return this;
     }
 
-    public TiCMaterial addPrimaryToolTrait(String trait) {
+    public ITiCMaterial addPrimaryToolTrait(String trait) {
         this.addTrait(trait, MaterialTypes.HEAD);
         return this;
     }
 
-    public TiCMaterial addSecondaryToolTrait(String trait) {
+    public ITiCMaterial addSecondaryToolTrait(String trait) {
         this.addTrait(trait, MaterialTypes.HANDLE);
         this.addTrait(trait, MaterialTypes.EXTRA);
         return this;
     }
 
-    public TiCMaterial addGlobalToolTrait(String trait) {
+    public ITiCMaterial addGlobalToolTrait(String trait) {
         this.addPrimaryToolTrait(trait);
         this.addSecondaryToolTrait(trait);
         return this;
     }
 
-    public TiCMaterial addToolTrait(String trait1, String trait2) {
+    public ITiCMaterial addToolTrait(String trait1, String trait2) {
         this.addPrimaryToolTrait(trait1);
         this.addSecondaryToolTrait(trait2);
         return this;
     }
 
-    public TiCMaterial registerOreDict() {
+    public ITiCMaterial registerOreDict() {
         ItemStack stack = this.getItemStack();
         if(stack != null){
             OreDictionary.registerOre(this.identifier, this.getItemStack());

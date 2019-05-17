@@ -21,12 +21,12 @@ import java.util.*;
 import static org.softc.armoryexpansion.integration.aelib.Config.CATEGORY_MATERIAL;
 
 public abstract class AbstractIntegration{
-    private Logger logger;
+    protected Logger logger;
     protected String modid = "";
-    private Config configHelper;
-    private boolean isEnabled = false;
+    protected Config configHelper;
+    protected boolean isEnabled = false;
     private boolean forceCreateJson = false;
-    private Map<String, ITiCMaterial> materials = new HashMap<>();
+    protected Map<String, ITiCMaterial> materials = new HashMap<>();
     private Map<String, TiCAlloy> alloys = new HashMap<>();
 
     public void preInit(FMLPreInitializationEvent event) {
@@ -36,8 +36,7 @@ public abstract class AbstractIntegration{
         isEnabled = property == null || property.getBoolean();
         ArmoryExpansion.config.save();
         if(isEnabled){
-            this.configHelper = new Config(new Configuration(new File(event.getModConfigurationDirectory().getPath() + "/" + ArmoryExpansion.MODID + "/" + modid + ".cfg")));
-//            configHelper = new Config(new Configuration(event.getSuggestedConfigurationFile()));
+            this.configHelper = this.getConfigHelper(event);
             this.setMaterials(event);
             this.setAlloys(event);
             this.configHelper.syncConfig(materials);
@@ -64,12 +63,12 @@ public abstract class AbstractIntegration{
         this.materials.values().forEach(m -> event.getRegistry().registerAll(m.getFluidBlock()));
     }
 
-    public Configuration getConfiguration() {
-        return this.configHelper.getConfiguration();
-    }
-
     private Config getConfigHelper() {
         return this.configHelper;
+    }
+
+    protected Config getConfigHelper(FMLPreInitializationEvent event){
+        return new Config(new Configuration(new File(event.getModConfigurationDirectory().getPath() + "/" + ArmoryExpansion.MODID + "/" + modid + ".cfg")));
     }
 
     protected void addMaterial(ITiCMaterial material){
@@ -78,7 +77,7 @@ public abstract class AbstractIntegration{
         }
     }
 
-    private void setMaterials(FMLPreInitializationEvent event){
+    protected void setMaterials(FMLPreInitializationEvent event){
         this.loadMaterialsFromJson(event.getModConfigurationDirectory(), this.modid);
         this.loadMaterialsFromSource();
         this.saveMaterialsToJson(event.getModConfigurationDirectory(), this.modid, this.forceCreateJson);
@@ -103,7 +102,7 @@ public abstract class AbstractIntegration{
         }
     }
 
-    void loadMaterialsFromJson(InputStream path){
+    protected void loadMaterialsFromJson(InputStream path){
         GsonBuilder builder = new GsonBuilder().setPrettyPrinting().setLenient();
         Gson gson = builder.create();
 
@@ -111,7 +110,7 @@ public abstract class AbstractIntegration{
         this.loadMaterials(jsonMaterials);
     }
 
-    private void loadMaterialsFromJson(String path){
+    protected void loadMaterialsFromJson(String path){
         GsonBuilder builder = new GsonBuilder().setPrettyPrinting().setLenient();
         Gson gson = builder.create();
 
@@ -252,7 +251,7 @@ public abstract class AbstractIntegration{
         });
     }
 
-    private void registerMaterialStats() {
+    protected void registerMaterialStats() {
         this.materials.values().forEach(m -> {
             if (this.isMaterialEnabled(m) && m.registerTinkersMaterialStats(getProperties(m))) {
                 this.logger.info("Registered stats for tinker's material {" + m.getIdentifier() + "};");
@@ -268,7 +267,7 @@ public abstract class AbstractIntegration{
         });
     }
 
-    private void registerMaterialTraits() {
+    protected void registerMaterialTraits() {
         this.materials.values().forEach(m -> {
             if (this.isMaterialEnabled(m) && m.registerTinkersMaterialTraits()) {
                 this.logger.info("Registered traits for tinker's material {" + m.getIdentifier() + "};");
@@ -292,7 +291,7 @@ public abstract class AbstractIntegration{
         return (this.getProperty(material, property) != null) && Objects.requireNonNull(this.getProperty(material, property)).getBoolean();
     }
 
-    private boolean isMaterialEnabled(ITiCMaterial material){
+    protected boolean isMaterialEnabled(ITiCMaterial material){
         Property property = getProperty(material, CATEGORY_MATERIAL);
         if (property != null){
             return (this.getProperty(material, CATEGORY_MATERIAL) != null) && Objects.requireNonNull(this.getProperty(material, CATEGORY_MATERIAL)).getBoolean();
@@ -304,7 +303,7 @@ public abstract class AbstractIntegration{
         this.forceCreateJson = true;
     }
 
-    private String returnMaterialExample(){
+    protected String returnMaterialExample(){
         return  "//  {\n" +
                 "//    The material's durability is this value multiplied by 8\n" +
                 "//    \"durability\": 36,\n" +
