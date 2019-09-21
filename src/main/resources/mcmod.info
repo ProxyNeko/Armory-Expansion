@@ -11,15 +11,6 @@
   "logoFile": ""
 },
 {
-  "modid": "armoryexpansion-iceandfire",
-  "name": "Armory Expansion - Ice and Fire",
-  "version": "${version}",
-  "mcversion": "${mcversion}",
-  "url": "https://www.curseforge.com/minecraft/mc-mods/armory-expansion",
-  "authorList": ["YaibaToKen"],
-  "parent": "armoryexpansion"
-},
-{
   "modid": "armoryexpansion-conarm",
   "name": "Armory Expansion - Construct's Armory",
   "version": "${version}",
